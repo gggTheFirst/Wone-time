@@ -2,14 +2,28 @@ import { Button, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
 import ProjectSummary from './ProjectSummary';
 import ProjectProgress from './ProjectProgress';
+import NewProject from './NewProject';
 
 import TimerIcon from '@mui/icons-material/Timer';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 
-function DashBoard(){
+import { useState } from 'react';
 
+
+function DashBoard(){
+    
     const project_list : number[] = [1,2,4,5];
 
+    //Stuff for the pop up
+    const [show, setShow] = useState<boolean>(false);
+
+    const handleClick = () => {
+        setShow(true);
+    };
+
+    const handleClose = () => {
+        setShow(false);
+    };
     return(
         <Box sx={{ border: "1px solid black",  width: "85vw", p:3}}>
             <Typography variant='h4'>Dashboard</Typography>
@@ -57,7 +71,7 @@ function DashBoard(){
                 <Box sx={{ border: "1px solid black", width:"50%", p: 2, display:"flex", flexDirection: "column"}}>
                     <Box sx={{display: "flex", position: "relative", m:2, mt: 0}}>
                         <Typography variant='h5' >Projects</Typography>
-                        <Button sx={{position: "absolute", right: "10px", px: 5}}>Add new</Button>
+                        <Button sx={{position: "absolute", right: "10px", px: 5}} onClick={handleClick}>Add new</Button>
 
                     </Box>
 
@@ -72,6 +86,7 @@ function DashBoard(){
                 </Box>
 
             </Box>
+            <NewProject closeFn={handleClose} visibility={show}/>
         </Box>
     )
 }
