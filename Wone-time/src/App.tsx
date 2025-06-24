@@ -5,13 +5,12 @@ import Footer from "./components/Footer"
 import Header from "./components/Header"
 import ForgotPassword from "./pages/ForgotPassword"
 import AuthProvider from "./AuthLoader"
+import TimeEntries from "./pages/TimeEntries"
 
 import { useLoginInfo } from './stores/loginState';
-import { auth } from "./services/firebase";
 
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom"
-import ResetPassword from "./pages/ResetPassword"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 function App() {
   
@@ -34,7 +33,7 @@ function App() {
           <Route path='/' element={<Home/>}/> 
           <Route path='/Report' element={<Report/>}/>
           <Route path='/forgotpassword' element={<ForgotPassword/>}/>
-          <Route path='/resetpassword' element={<ResetPassword/>}/>
+          <Route path='/timeEntries' element={<TimeEntries/>}/>
 
         </Routes>
       </AuthProvider>

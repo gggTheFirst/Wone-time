@@ -1,6 +1,6 @@
-import Box from '@mui/material/Box';
-import CardContent from '@mui/material/CardContent';
 import { Card, Input, Button, Typography, InputLabel } from '@mui/material';
+import Box from '@mui/material/Box';
+
 import { useState } from 'react';
 import { useNavigate } from "react-router";
 
@@ -133,7 +133,6 @@ function Signup(){
                 <InputLabel htmlFor="email_signup">Email</InputLabel>
                 <Input required={error.hasError} 
                 id="email_signup" 
-                value={username}
                 onChange={(e) => setUsername(e.target.value)} 
                 placeholder='Enter you email'/>
 
@@ -203,7 +202,7 @@ function UserAccount(){
     const newUser = useLoginInfo((state) => state.newUser)
 
     return(
-        <Box sx={{width:"100vw", height: "100vh", display: "flex", justifyContent: "center", alignContent: "center", flexWrap: "wrap" }}>
+        <Box sx={{width:"100vw", height: "98vh", display: "flex", justifyContent: "center", alignContent: "center", flexWrap: "wrap" }}>
 
             {newUser ? <Signup /> : <Login/>}
             

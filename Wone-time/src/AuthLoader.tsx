@@ -1,7 +1,7 @@
 // AuthProvider.tsx
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { useNavigate } from "react-router-dom"; 
+import {Box, CircularProgress} from '@mui/material'
 import { auth } from "./services/firebase";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -17,7 +17,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     return () => unsubscribe(); 
   }, []);
 
-  if (loading) return <h2>Loading...</h2>
+  if (loading) return (
+
+    <Box sx={{ display: 'flex', justifyContent: "center", minHeight: "95vh", alignContent: "center", flexWrap: "wrap" }}>
+      <CircularProgress size={"70px"}  />
+    </Box>
+  )
+
 
   return <>{children}</>;
 }
