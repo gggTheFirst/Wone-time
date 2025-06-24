@@ -1,9 +1,17 @@
+import Sidebar from '../components/Sidebar';
+import { Box } from '@mui/material';
+import DashBoard from '../components/DashBoard';
 
 function TimeEntries(){
+
+
     return(
-        <h1>
-            This is the TimeEntries page dashboard area
-        </h1>
+        <>
+        <Box sx={{minWidth: "100vw", minHeight: "95vh", display: "flex"}}>
+            <Sidebar/>
+            <DashBoard/>
+        </Box>
+        </>
     )
 }
 
