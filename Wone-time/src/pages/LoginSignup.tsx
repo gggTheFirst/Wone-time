@@ -12,6 +12,7 @@ import { type ErrorMessage } from '../types';
 import { parseError } from '../services/firebaseError';
 
 
+const debug : boolean = false
 
 const handleLogout = async () => {
   try {
@@ -61,10 +62,10 @@ function Login(){
                     </Typography>
 
                     <InputLabel htmlFor="email_login">Email</InputLabel>
-                    <Input id="email_login" onChange={(e) => setUsername(e.target.value)} placeholder='Enter you useranme'/>
+                    <Input id="email_login" onChange={(e) => setUsername(e.target.value)} placeholder='Enter you email'/>
 
                     <InputLabel htmlFor="password_login">Password</InputLabel>
-                    <Input id="password_login" onChange={(e) => setPassword(e.target.value)} placeholder='Enter you password'/>  
+                    <Input type='password' id="password_login" onChange={(e) => setPassword(e.target.value)} placeholder='Enter you password'/>  
     
                     {error.hasError &&
                     <>
@@ -85,8 +86,9 @@ function Login(){
                 
                         <Typography variant='caption'>Don't have an account? </Typography>
                         <Button onClick={() => changeStatus(true)}>Create account</Button>     
-                   
+                   {debug && 
                     <Button onClick={() => console.log(auth.currentUser)}>View account infomration</Button>
+                    }
                
             </Box>
         </Card>
@@ -184,7 +186,6 @@ function Signup(){
 
 function UserAccount(){
 
-    const debug : boolean = false
     function CheckUserstatus(){
                 console.log(useLoginInfo.getState().loginStatus);
 
