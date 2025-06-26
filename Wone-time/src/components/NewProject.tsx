@@ -32,16 +32,16 @@ function NewProject({closeFn, visibility }: {closeFn : () => void; visibility : 
             
             >
             <Box sx={{minHeight: "10vh", minWidth: "50vw", p:2, display: "flex", flexDirection: 'column', position:"relative"}}>
-                <CloseIcon sx={{position:"absolute", right:"10px"}}/>
+                <CloseIcon sx={{position:"absolute", right:"10px"}} onClick={closeFn}/>
                 <Typography variant='h3'>Create New Project</Typography>
                 <Typography>Add a new project to start tracking time</Typography>
 
-                <InputLabel htmlFor="prioject_name">Project Name</InputLabel>
-                <TextField ref={nameRef} type='text' id="passwoprioject_namerd_login" placeholder='Project Name'/>  
+                <InputLabel htmlFor="project_name">Project Name</InputLabel>
+                <TextField ref={nameRef} type='text' id="project_name" placeholder='Project Name'/>  
     
 
                 <InputLabel htmlFor="project_description">Description</InputLabel>
-                <TextField ref={descRef}  multiline rows={4} type='text' id="project_description"  placeholder='Enter you password'/>  
+                <TextField ref={descRef}  multiline rows={4} type='text' id="project_description"  placeholder="Project Description"/>  
     
                 <Box sx={{justifyContent: "right", display: "flex"}}>
                     <Button onClick={closeFn} sx={{p:2}}>Cancel</Button>
