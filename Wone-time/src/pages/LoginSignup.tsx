@@ -7,11 +7,14 @@ import { useNavigate } from "react-router";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useLoginInfo } from '../stores/loginState';
-import { type ErrorMessage } from '../types';
+import { type ErrorMessage, type UserData } from '../types';
 import { parseError } from '../services/firebaseError';
 
+import { useMutation } from '@tanstack/react-query';
+import api from '../services/api';
 
-const debug : boolean = false
+
+const debug : boolean = false;
 
 const handleLogout = async () => {
   try {
@@ -26,8 +29,10 @@ const handleLogout = async () => {
 
 
 
+
 function Login(){
 
+    
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<ErrorMessage>({hasError: false, message: ""});
@@ -39,6 +44,7 @@ function Login(){
         try {
             const userCredential = await signInWithEmailAndPassword(auth, username, password);
             console.log("Logged in as", userCredential.user.email);
+
             if (auth.currentUser?.emailVerified === false){
                 handleLogout()
                 const error = new Error("Email not verified!");
@@ -46,6 +52,7 @@ function Login(){
                 throw error;
             }
             useLoginInfo.setState({loginStatus : true});
+            useLoginInfo.setState({userId : auth.currentUser?.uid});
             navigate('/')
         } catch (error) {
             setError({hasError: true, message: parseError(error.code)})
@@ -87,7 +94,10 @@ function Login(){
                         <Typography variant='caption'>Don't have an account? </Typography>
                         <Button onClick={() => changeStatus(true)}>Create account</Button>     
                    {debug && 
-                    <Button onClick={() => console.log(auth.currentUser)}>View account infomration</Button>
+                    <Button onClick={() => {
+                        console.log(auth.currentUser); 
+                        console.log(auth.currentUser?.getIdToken())
+                    }}>View account infomration</Button>
                     }
                
             </Box>
@@ -96,7 +106,43 @@ function Login(){
 }
 
 function Signup(){
-     
+
+
+    const addNewUser = async (UserAccount : UserData) => {
+
+        const key = await auth.currentUser?.getIdToken();
+
+        const response = await api({
+            method: "post",
+            url: "/users",
+            data: UserAccount,
+            headers: {
+                "Authorization" : `Bearer ${key}`
+            },
+            
+        })
+        return response
+    }
+    const mutation = useMutation({
+        mutationFn: addNewUser,
+        onSuccess: () => {if (debug === true) alert("User successfully added a user!")}
+    })
+
+    function handleAddNewUser(){
+
+        let displayName = prompt("Please enter your display name:", "Harry Potter");
+
+        while (!displayName) {
+            displayName = prompt("Enter a valuid username please:", "Harry Potter");
+        }
+
+        const newAccount : UserData = {
+            name : displayName,
+            email : username,
+            userId : auth.currentUser?.uid
+        }
+        mutation.mutate(newAccount)
+    }
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [confirmpassword, setConfirmPassword] = useState<string>("");
@@ -108,9 +154,16 @@ function Signup(){
         if (password === confirmpassword){
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, username, password);
-                console.log(userCredential.user);
+
+                if (debug === true){
+                    console.log(userCredential.user);
+                }
+                
 
                 await sendEmailVerification(userCredential.user);
+                
+                handleAddNewUser()  // add user to database
+
                 alert("Go verify your email! or else you will not be able to login!");     
                 handleLogout(); // need to first verify their account
 

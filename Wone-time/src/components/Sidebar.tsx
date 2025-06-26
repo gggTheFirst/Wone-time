@@ -21,7 +21,8 @@ function Sidebar(){
       try {
         await signOut(auth);
         console.log("User signed out.");
-        useLoginInfo.setState({loginStatus : false});
+        useLoginInfo.setState({loginStatus : false, userName: undefined, userId : ""});
+        
         navigate('/Login_Signup') 
     
       } catch (error) {

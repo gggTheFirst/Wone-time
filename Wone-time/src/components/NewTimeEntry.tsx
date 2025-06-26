@@ -5,17 +5,65 @@ import Box from '@mui/material/Box';
 
 import CloseIcon from '@mui/icons-material/Close';
 
-function NewTimeEntry({closeFn, visibility }: {closeFn : () => void; visibility : boolean}){
+import api from '../services/api';
+import { auth } from '../services/firebase';
+import { type ProjectData, type TimeEntryData } from '../types';
+import { useMutation } from '@tanstack/react-query';
+import { useLoginInfo } from '../stores/loginState';
 
-    const project_list : string[] = ["Project A","Project B","Project C","Project D"];
+function NewTimeEntry({myProjects, closeFn, visibility }: {myProjects: ProjectData[] ,closeFn : () => void; visibility : boolean}){
 
-    const nameRef = useRef(null);
-    const descRef = useRef(null);
+    //getting projects
+    const projNameRef = useRef(null);
+    const notesRef = useRef(null);
 
-    function addTime(){
-        // access APO and everything
-        alert("Created!")
+
+    // adding time entries
+    const createProject = async (LogEntry : TimeEntryData) => {
+        const key = await auth.currentUser?.getIdToken();
+        console.log(key)
+        const response = await api({
+            method: 'post',
+            url: '/time-entries',
+            data: LogEntry,
+            headers: {
+                "Authorization" : `Bearer ${key}`
+            },
+            });
+            console.log(response)
+            return response
+
     }
+
+    const mutation = useMutation({
+        mutationFn: createProject,
+        onSuccess: () => {
+        // Optionally refetch project list
+        //queryClient.invalidateQueries(['projects']);
+        alert("You have made a new time entry!");
+        
+        },
+    });
+
+    function handleClick(){
+        const LogEntry : TimeEntryData ={
+            // add id 
+            projectId: projNameRef.current?.value,
+            userId : useLoginInfo.getState().userId,
+            notes: notesRef.current?.value,
+            date: new Date(),
+            time: new Date(),
+            created: new Date(),
+            updated: new Date(),
+
+        }
+        
+        mutation.mutate(LogEntry)
+
+    }
+
+
+
 
     return(
         <Popover 
@@ -39,21 +87,24 @@ function NewTimeEntry({closeFn, visibility }: {closeFn : () => void; visibility 
 
                 <InputLabel  sx={{mt:2, mb:1}} htmlFor="prioject_name">Project Name</InputLabel>
                 <TextField
-                    ref={nameRef}
+                    ref={projNameRef}
                     id="prioject_name"
                     select
-                    defaultValue={project_list[0]}
                     sx={{minWidth: "200px"}}
-                > {project_list.map((project, index) => (
-                    <MenuItem key={index} value={project}>
-                        {project}
-                    </MenuItem>
-                ))}         
+                > 
+                
+                {
+                    myProjects? myProjects.map((project) => (
+                        <MenuItem key={project.id} value={project.id /*project id*/}>
+                            {project.name}
+                        </MenuItem>
+                )) : 'nothing to see'}
+                        
                 </TextField>
 
 
                 <InputLabel sx={{mt:2, mb:1}} htmlFor="time_entry_desc">Description</InputLabel>
-                <TextField ref={descRef}  multiline rows={4} type='text' id="time_entry_desc"  placeholder='Description'/>  
+                <TextField ref={notesRef}  multiline rows={4} type='text' id="time_entry_desc"  placeholder='Description'/>  
 
                 <Box sx={{display: "flex", my:3}}>
                     <Box sx={{pr:4}}>
@@ -67,8 +118,8 @@ function NewTimeEntry({closeFn, visibility }: {closeFn : () => void; visibility 
                 </Box>
                 <Box sx={{justifyContent: "right", display: "flex"}}>
                     <Button onClick={closeFn} sx={{p:2}}>Cancel</Button>
-                    <Button onClick={addTime} sx={{p:2}}>Add and Continue</Button>
-                    <Button onClick={() => {addTime(); closeFn()}} sx={{p:2}}>Add</Button>
+                    <Button onClick={handleClick} sx={{p:2}}>Add and Continue</Button>
+                    <Button onClick={() => {handleClick(); closeFn()}} sx={{p:2}}>Add</Button>
                 </Box>
             </Box>
 

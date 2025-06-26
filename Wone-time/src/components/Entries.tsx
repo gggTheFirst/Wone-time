@@ -3,17 +3,92 @@ import Entry from "./Entry";
 import { useState } from "react";
 import NewTimeEntry from "./NewTimeEntry";
 
-function Entries(){
-        //Stuff for the pop up
-    const [show, setShow] = useState<boolean>(false);
+import { useMutation } from "@tanstack/react-query";
+import api from "../services/api";
+import { type TimeEntryData } from "../types";
 
+import { auth } from "../services/firebase";
+import { useLoginInfo } from "../stores/loginState";
+
+import { useQuery } from "@tanstack/react-query";
+import { type ProjectData } from "../types";
+
+function Entries(){
+    //Stuff for the pop up
+    const [show, setShow] = useState<boolean>(false);
     const handleClick = () => {
         setShow(true);
     };
-
     const handleClose = () => {
         setShow(false);
     };
+
+    //getting projects
+    async function getProjects(id : string){
+        const key = await auth.currentUser?.getIdToken();
+
+        const response = await api({
+            method : 'get',
+            url: `/projects/user/${id}`,
+            headers: {
+                "Authorization" : `Bearer ${key}`
+            },
+        })
+
+        return response.data
+    }
+
+    const userId = useLoginInfo.getState().userId;
+    const {data, isLoading} = useQuery<ProjectData>({
+        queryKey: ["projects"],
+        queryFn: () => getProjects(userId),
+    })
+
+    //get time entries
+        async function getTimeEntries(id : string){
+        const key = await auth.currentUser?.getIdToken();
+
+        const response = await api({
+            method : 'get',
+            url: `/time-entries/project/user/${id}`,
+            headers: {
+                "Authorization" : `Bearer ${key}`
+            },
+        })
+
+        return response.data
+    }
+
+    const {time_data, time_isLoading} = useQuery<ProjectData>({
+        queryKey: ["projects"],
+        queryFn: () => getProjects(userId),
+    })
+
+    //editing time entries
+    const editTimeRecords = async ( {id, newData}:{id : string, newData : TimeEntryData}) => {
+        const response = await api({
+            method: "patch",
+            url: `/time-entries/${id}`,
+            data: newData
+        });
+        return response.data; // Return updated data
+    };
+
+
+    const editMutation = useMutation({
+        mutationFn: editTimeRecords,
+        onSuccess: () => {
+            // Refetch user or update cache
+            alert('You have successfully updated the record')
+        },
+    });
+
+    function changeRecord(entry_id : string, entryData: TimeEntryData){
+        editMutation.mutate({
+            id: entry_id, 
+            newData: entryData
+        });
+    }
 
     const project_list : string[] = ["Project A","Project B","Project C","Project D"];
     return (
@@ -72,10 +147,11 @@ function Entries(){
                 </Box>
 
             </Box>
-            {project_list.map((project, index) =>(
-                <Entry key={index}/>
+            {(data)? 'nothing to see': project_list.map((project) =>(
+                // <Entry editFn={() => changeRecord(project.id, )} key={project.id}/>
+                'filler'
             ))}
-            <NewTimeEntry closeFn={handleClose} visibility={show}/>
+            <NewTimeEntry myProjects={data} closeFn={handleClose} visibility={show}/>
         </Box>
         
     )

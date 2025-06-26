@@ -3,3 +3,25 @@ export type ErrorMessage = {
   message: string;
 };
 
+export type ProjectData = {
+  id : string;
+  name : string;
+  description : string;
+}
+
+export type TimeEntryData = {
+  projectId : string;
+  userId : string;
+  date: Date;
+  time: Date;
+  notes: string;
+  created? : Date;
+  updated? : Date;
+}
+
+export type UserData = {
+  id? : string;
+  name: string;
+  email: string;
+  userId? : string;
+}
