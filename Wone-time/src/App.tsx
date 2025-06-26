@@ -11,6 +11,9 @@ import { useLoginInfo } from './stores/loginState';
 
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom"
 import { useEffect } from "react"
+import { QueryClient, QueryClientProvider, } from '@tanstack/react-query';
+
+const queryClient = new QueryClient()
 
 function App() {
   
@@ -25,7 +28,7 @@ function App() {
   
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Header/>
       <AuthProvider>
         <Routes>
@@ -38,7 +41,7 @@ function App() {
         </Routes>
       </AuthProvider>
       <Footer/>
-    </>
+    </QueryClientProvider>
   )
 }
 
