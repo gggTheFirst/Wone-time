@@ -6,7 +6,6 @@ import { useNavigate } from "react-router";
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification } from "firebase/auth";
 import { auth } from "../services/firebase";
-
 import { useLoginInfo } from '../stores/loginState';
 import { type ErrorMessage } from '../types';
 import { parseError } from '../services/firebaseError';
@@ -28,6 +27,7 @@ const handleLogout = async () => {
 
 
 function Login(){
+
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<ErrorMessage>({hasError: false, message: ""});
