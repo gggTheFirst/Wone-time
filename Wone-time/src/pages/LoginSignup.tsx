@@ -27,8 +27,6 @@ const handleLogout = async () => {
 };
 
 
-
-
 function Login(){
 
     
@@ -62,8 +60,8 @@ function Login(){
 
     return(
         <Card  sx={{width:400, height: 500}}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', p:2, alignContent: "center"}}>
-                    <Typography variant="h2" >
+            <Box sx={{ display: 'flex', flexDirection: 'column', p:2}}>
+                    <Typography variant="h2" sx={{mb:2}} >
                         Login
                     </Typography>
 
@@ -82,16 +80,21 @@ function Login(){
                     </>
                     }
                 
-                    <Button onClick={() => {
+                    <Button sx={{alignSelf: 'flex-start',  my:2}} onClick={() => {
                         handleLogin(username, password);
                         setError({hasError: false, message: ""});
                     }}>Login</Button> 
 
-                    <Typography variant='caption' sx={{cursor: 'pointer'}} onClick={() => {navigate('/forgotpassword');}}>forgot password?</Typography>
-                    <br />
-                
+                    <Typography sx={{alignSelf: 'center', ml:1, mb:2, cursor: 'pointer'}} 
+                        variant='caption' onClick={() => {navigate('/forgotpassword');}}>
+                        forgot password?
+                    </Typography>
+                    
+                    <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-evenly"}}>
                         <Typography variant='caption'>Don't have an account? </Typography>
                         <Button onClick={() => changeStatus(true)}>Create account</Button>     
+                    </Box>
+                    
                    {debug && 
                     <Button onClick={() => {
                         console.log(auth.currentUser); 
@@ -165,18 +168,20 @@ function Signup(){
     return(
        <Card  sx={{width:400, height: 500, display: "flex", flexDirection: "column", p:2}}>
          
-                <Typography variant="h2" >
+                <Typography variant="h2" variant="h2" sx={{mb:2}}>
                     SignUp
                 </Typography>
           
                 <InputLabel htmlFor="email_signup">Email</InputLabel>
                 <Input required={error.hasError} 
+                sx={{mb: "4px"}}
                 id="email_signup" 
                 onChange={(e) => setUsername(e.target.value)} 
                 placeholder='Enter you email'/>
 
                 <InputLabel htmlFor="password_signup">Password</InputLabel>
                 <Input id="password_signup" 
+                    sx={{mb: "4px", width: "50"}}
                     required={error.hasError}
                     type="password"
                     onChange={(e) => setPassword(e.target.value)} 
@@ -184,6 +189,7 @@ function Signup(){
 
                 <InputLabel htmlFor="confirm_password_signup">Confirm password</InputLabel>
                 <Input id="confirm_password_signup"
+                
                     required={error.hasError}
                     type="password"
                     onChange={(e) => setConfirmPassword(e.target.value)} 
@@ -199,13 +205,12 @@ function Signup(){
                     </>
                     }
             
-                <Button onClick={() => {    
+                 <Button sx={{alignSelf: 'flex-start',  my:2}} onClick={() => {
                     setError({hasError: false, message: ""})
                     handleSignup(username, password, confirmpassword); 
                     }}>Sign up</Button> 
-                <br />
 
-                <Box>
+                <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-evenly"}}>
                     <Typography variant='caption'>Already have an account? </Typography>
                     <Button onClick={() => changeStatus(false)}>Login</Button>     
                 </Box>
@@ -240,7 +245,7 @@ function UserAccount(){
     const newUser = useLoginInfo((state) => state.newUser)
 
     return(
-        <Box sx={{width:"100vw", height: "98vh", display: "flex", justifyContent: "center", alignContent: "center", flexWrap: "wrap" }}>
+        <Box sx={{width:"100vw", height: "98vh", display: "flex", justifyContent: "center", alignItems: "center"}}>
 
             {newUser ? <Signup /> : <Login/>}
             
