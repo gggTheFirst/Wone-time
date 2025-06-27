@@ -1,6 +1,6 @@
 import { Card, Typography, InputLabel, Button, Box, Input } from "@mui/material";
 import { useState } from "react";
-import { fetchSignInMethodsForEmail,sendPasswordResetEmail } from "firebase/auth";
+import {sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../services/firebase"; 
 import { type ErrorMessage } from '../types';
 import { parseError } from '../services/firebaseError';

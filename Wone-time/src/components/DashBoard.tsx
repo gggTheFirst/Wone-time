@@ -1,29 +1,48 @@
 import { Button, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
+import TimerIcon from '@mui/icons-material/Timer';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+
 import ProjectSummary from './ProjectSummary';
 import ProjectProgress from './ProjectProgress';
 import NewProject from './NewProject';
 
-import TimerIcon from '@mui/icons-material/Timer';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-
 import { useState } from 'react';
+import { useLoginInfo } from '../stores/loginState';
+import { useQuery } from '@tanstack/react-query';
 
+import { type ProjectData, type TimeEntryData } from '../types';
+import { getProjects, getTimeEntries } from '../services/api';
 
 function DashBoard(){
     
+    // getting projects
     const project_list : number[] = [1,2,4,5];
+    const userId = useLoginInfo.getState().userId;
+
+    const {project_data, project_isLoading} = useQuery<ProjectData>({
+        queryKey: ["projects"],
+        queryFn: () => getProjects(userId),
+    })
+
+    const {time_data, time_isLoading} = useQuery<TimeEntryData>({
+        queryKey: ["time_entries", userId],
+        queryFn: () => getTimeEntries(userId /* should be project id*/),
+    })
+
+    // need to go a bunch of math to get the statistics
+    
+
 
     //Stuff for the pop up
     const [show, setShow] = useState<boolean>(false);
-
     const handleClick = () => {
         setShow(true);
     };
-
     const handleClose = () => {
         setShow(false);
     };
+
     return(
         <Box sx={{ border: "1px solid black",  width: "85vw", p:3}}>
             <Typography variant='h4'>Dashboard</Typography>

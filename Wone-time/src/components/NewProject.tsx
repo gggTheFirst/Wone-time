@@ -1,17 +1,16 @@
-import { useRef } from 'react';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-
 import { Button, Typography, Popover, InputLabel, TextField} from '@mui/material';
 import Box from '@mui/material/Box';
-
 import CloseIcon from '@mui/icons-material/Close';
-import api from '../services/api';
+
+import { useMutation } from '@tanstack/react-query';
+import { createProject } from '../services/api';
 
 import { type ProjectData } from '../types';
 import { useLoginInfo } from '../stores/loginState';
-import { auth } from '../services/firebase';
 
 import { useState } from 'react';
+
+
 
 function NewProject({closeFn, visibility }: {closeFn : () => void; visibility : boolean}){
 
@@ -19,22 +18,8 @@ function NewProject({closeFn, visibility }: {closeFn : () => void; visibility : 
     const [projectname, setProjectName] = useState<string>("")
     const [projectdesc, setProjectDescription] = useState<string>("")
 
-    const createProject = async (newProj : ProjectData) => {
-        const key = await auth.currentUser?.getIdToken();
 
-        const response = await api({
-            method: 'post',
-            url: '/projects',
-            data: newProj,
-            headers: {
-                "Authorization" : `Bearer ${key}`
-            },
-            });
-            console.log(response)
-            return response
-
-        }
-
+    //creating project
     const mutation = useMutation({
         mutationFn: createProject,
         onSuccess: () => {

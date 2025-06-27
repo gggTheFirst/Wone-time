@@ -11,8 +11,7 @@ import { type ErrorMessage, type UserData } from '../types';
 import { parseError } from '../services/firebaseError';
 
 import { useMutation } from '@tanstack/react-query';
-import api from '../services/api';
-
+import { addNewUser } from '../services/api';
 
 const debug : boolean = false;
 
@@ -108,21 +107,6 @@ function Login(){
 function Signup(){
 
 
-    const addNewUser = async (UserAccount : UserData) => {
-
-        const key = await auth.currentUser?.getIdToken();
-
-        const response = await api({
-            method: "post",
-            url: "/users",
-            data: UserAccount,
-            headers: {
-                "Authorization" : `Bearer ${key}`
-            },
-            
-        })
-        return response
-    }
     const mutation = useMutation({
         mutationFn: addNewUser,
         onSuccess: () => {if (debug === true) alert("User successfully added a user!")}

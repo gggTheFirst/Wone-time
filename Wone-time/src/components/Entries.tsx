@@ -1,17 +1,11 @@
 import { Box, Button, Typography, TextField, MenuItem } from "@mui/material"
-import Entry from "./Entry";
 import { useState } from "react";
 import NewTimeEntry from "./NewTimeEntry";
-
-import { useMutation } from "@tanstack/react-query";
-import api from "../services/api";
-import { type TimeEntryData } from "../types";
-
-import { auth } from "../services/firebase";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type{  TimeEntryData, ProjectData } from "../types";
 import { useLoginInfo } from "../stores/loginState";
+import { getProjects, getTimeEntries, editTimeRecords } from '../services/api';
 
-import { useQuery } from "@tanstack/react-query";
-import { type ProjectData } from "../types";
 
 function Entries(){
     //Stuff for the pop up
@@ -24,20 +18,6 @@ function Entries(){
     };
 
     //getting projects
-    async function getProjects(id : string){
-        const key = await auth.currentUser?.getIdToken();
-
-        const response = await api({
-            method : 'get',
-            url: `/projects/user/${id}`,
-            headers: {
-                "Authorization" : `Bearer ${key}`
-            },
-        })
-
-        return response.data
-    }
-
     const userId = useLoginInfo.getState().userId;
     const {data, isLoading} = useQuery<ProjectData>({
         queryKey: ["projects"],
@@ -45,36 +25,12 @@ function Entries(){
     })
 
     //get time entries
-        async function getTimeEntries(id : string){
-        const key = await auth.currentUser?.getIdToken();
-
-        const response = await api({
-            method : 'get',
-            url: `/time-entries/project/user/${id}`,
-            headers: {
-                "Authorization" : `Bearer ${key}`
-            },
-        })
-
-        return response.data
-    }
-
-    const {time_data, time_isLoading} = useQuery<ProjectData>({
-        queryKey: ["projects"],
-        queryFn: () => getProjects(userId),
+    const {time_data, time_isLoading} = useQuery<TimeEntryData>({
+        queryKey: ["timeEntries"],
+        queryFn: () => getTimeEntries(userId ),
     })
 
     //editing time entries
-    const editTimeRecords = async ( {id, newData}:{id : string, newData : TimeEntryData}) => {
-        const response = await api({
-            method: "patch",
-            url: `/time-entries/${id}`,
-            data: newData
-        });
-        return response.data; // Return updated data
-    };
-
-
     const editMutation = useMutation({
         mutationFn: editTimeRecords,
         onSuccess: () => {
@@ -82,7 +38,6 @@ function Entries(){
             alert('You have successfully updated the record')
         },
     });
-
     function changeRecord(entry_id : string, entryData: TimeEntryData){
         editMutation.mutate({
             id: entry_id, 

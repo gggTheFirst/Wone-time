@@ -1,7 +1,26 @@
 import { Button, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
+import { getTimeEntries, getProjects } from '../services/api';
+import { useQuery } from '@tanstack/react-query';
+import { useLoginInfo } from '../stores/loginState';
+import type { TimeEntryData, ProjectData } from '../types';
 
 function ReportSummary(){
+    //get time entries
+    const userId = useLoginInfo.getState().userId;
+    
+    const {data, isLoading} = useQuery<TimeEntryData>({
+        queryKey : ["timeEntries"],
+        queryFn: () => getTimeEntries(userId ),    
+    });
+
+    //get projects
+    const {project_data, project_isLoading} = useQuery<ProjectData>({
+        queryKey: ["projects"],
+        queryFn: () => getProjects(userId),
+    })
+    
+    //do the math behind
     return(
         <Box sx={{border: "1px solid black",p:2, display: 'flex', width: "85vw", flexDirection:"column"}}>
             <Box  sx={{border: "1px solid black", mb: 2, display: 'flex', width:"100%", position: "relative"}}>

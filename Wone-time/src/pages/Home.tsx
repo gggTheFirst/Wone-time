@@ -2,28 +2,11 @@ import Box from '@mui/material/Box';
 import Sidebar from '../components/Sidebar';
 import DashBoard from '../components/DashBoard';
 import { useQuery } from '@tanstack/react-query';
-import api from '../services/api';
 import { useLoginInfo } from '../stores/loginState';
-import { auth } from '../services/firebase';
 import { type UserData } from '../types';
+import { getUserInfo } from '../services/api';
 
 function Home(){
-
-
-
-    async function getUserInfo(id : string){
-        const key = await auth.currentUser?.getIdToken();
-        const response = await api({
-            method: "get",
-            headers: {
-                "Authorization" : `Bearer ${key}`
-            },
-            url: `/users/${id}`
-        })
-        console.log(response.data);
-        
-        return response.data;
-    }
 
     const {data} = useQuery<UserData>({
         queryKey : ["currentUser", ],
