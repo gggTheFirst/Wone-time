@@ -1,25 +1,35 @@
-import { Card, Typography, CardMedia, CardContent} from '@mui/material';
+import { Card, Typography, Box, CardContent, Avatar } from "@mui/material";
+import type { ProjectData } from "../types";
 
+function ProjectSummary({ project }: { project: ProjectData }) {
+  return (
+    <Card sx={{ width: "98%", display: "flex", m: "2px", borderRadius: "8px" }}>
+      <Box sx={{ width: "15%", position: "relative", paddingTop: "15%" }}>
+        <Avatar
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          Project X
+        </Avatar>
+      </Box>
 
-function ProjectSummary(){
-    return(
-        <Card sx={{width: "98%", display: "flex", m: "2px", borderRadius: "8px"}}>
-                            
-            <CardMedia
-                component="img"
-                image=""
-                alt="Project Image"
-                sx={{border: "1px solid black", width: "20%"}}
-            />
+      <CardContent
+        sx={{ display: "flex", flexDirection: "column", width: "70%" }}
+      >
+        <Typography variant="h6">{project.name}</Typography>
+        <Typography variant="body2">{project.description}</Typography>
+      </CardContent>
 
-            <CardContent  sx={{border: "1px solid black", display: "flex", flexDirection: "column", width: "70%"}}>
-                <Typography>Project name</Typography>
-                <Typography variant='caption'>Short Project description</Typography>
-            </CardContent>
-
-            <Typography sx={{border: "1px solid black"}}>Hours</Typography>
-        </Card>
-    )
+      <Box sx={{ alignItems: "center", display: "flex" }}>
+        <Typography variant={"h5"}>0.0 h</Typography>
+      </Box>
+    </Card>
+  );
 }
 
-export default ProjectSummary
+export default ProjectSummary;

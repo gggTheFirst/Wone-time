@@ -1,18 +1,7 @@
-import Sidebar from '../components/Sidebar';
-import { Box } from '@mui/material';
-import Entries from '../components/Entries';
+import Entries from "../components/Entries";
 
-function TimeEntries(){
-
-
-    return(
-        <>
-        <Box sx={{minWidth: "100vw", minHeight: "95vh", display: "flex"}}>
-            <Sidebar/>
-            <Entries/>
-        </Box>
-        </>
-    )
+function TimeEntries() {
+  return <Entries />;
 }
 
-export default TimeEntries
+export default TimeEntries;
