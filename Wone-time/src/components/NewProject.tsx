@@ -8,13 +8,14 @@ import {
 import Box from "@mui/material/Box";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProject } from "../services/api";
 
 import { type ProjectData } from "../types";
 import { useLoginInfo } from "../stores/loginState";
 
 import { useState } from "react";
+import BufferLoader from "./buffer";
 
 function NewProject({
   closeFn,
@@ -23,15 +24,17 @@ function NewProject({
   closeFn: () => void;
   visibility: boolean;
 }) {
+  const queryClient = useQueryClient();
   const [projectname, setProjectName] = useState<string>("");
   const [projectdesc, setProjectDescription] = useState<string>("");
 
   //creating project
-  const mutation = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: createProject,
     onSuccess: () => {
       // Optionally refetch project list
-      //queryClient.invalidateQueries(['projects']);
+      queryClient.invalidateQueries(["projects"]);
+      closeFn();
       alert("You have made a project whoopie!");
     },
   });
@@ -43,7 +46,7 @@ function NewProject({
       description: projectdesc,
     };
 
-    mutation.mutate(newProj);
+    mutate(newProj);
   }
 
   return (
@@ -86,6 +89,7 @@ function NewProject({
           onChange={(e) => setProjectName(e.target.value)}
           type="text"
           id="project_name"
+          value={projectname}
           placeholder="Project Name"
         />
 
@@ -94,6 +98,7 @@ function NewProject({
           onChange={(e) => setProjectDescription(e.target.value)}
           multiline
           rows={4}
+          value={projectdesc}
           type="text"
           id="project_description"
           placeholder="Project Description"
@@ -108,6 +113,7 @@ function NewProject({
           </Button>
         </Box>
       </Box>
+      {isPending && <BufferLoader />}
     </Popover>
   );
 }

@@ -103,7 +103,7 @@ export const deleteTimeRecord = async (id: string) => {
   const key = await auth.currentUser?.getIdToken();
   const response = await api({
     method: "delete",
-    url: `time-enteries/${id}`,
+    url: `/time-entries/${id}`,
     headers: {
       Authorization: `Bearer ${key}`,
     },

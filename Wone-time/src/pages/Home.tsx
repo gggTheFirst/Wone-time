@@ -6,11 +6,14 @@ import { getUserInfo } from "../services/api";
 
 function Home() {
   const { data } = useQuery<UserData>({
-    queryKey: ["currentUser"],
+    queryKey: ["currentUser", useLoginInfo.getState().userId],
     queryFn: () => getUserInfo(useLoginInfo.getState().userId),
   });
-  if (data) useLoginInfo.setState({ userName: data.name, userId: data.id });
-
+  if (data) {
+    console.log(" state setting");
+    useLoginInfo.setState({ userName: data.name, userId: data.id });
+  }
+  console.log(data);
   return <DashBoard />;
 }
 

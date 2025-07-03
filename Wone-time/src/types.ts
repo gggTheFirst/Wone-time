@@ -11,13 +11,15 @@ export type ProjectData = {
 };
 
 export type TimeEntryData = {
+  id: string;
   projectId: string;
   userId: string;
   date: Date;
-  time: number;
+  hours: number;
+  minutes: number;
   notes: string;
-  created?: Date;
-  updated?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type UserData = {
@@ -26,3 +28,10 @@ export type UserData = {
   email: string;
   userId?: string;
 };
+
+export interface EditInfo {
+  entryId?: string;
+  projectId?: string;
+  notes?: string;
+  duration?: number;
+}

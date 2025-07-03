@@ -1,42 +1,42 @@
 export const projectWorkData = [
   {
-    day: 'Monday',
+    day: "Monday",
     ProjectA: 3,
     ProjectB: 2,
     ProjectC: 3,
   },
   {
-    day: 'Tuesday',
+    day: "Tuesday",
     ProjectA: 4,
     ProjectB: 3,
     ProjectC: 1.5,
   },
   {
-    day: 'Wednesday',
+    day: "Wednesday",
     ProjectA: 2,
     ProjectB: 4.5,
     ProjectC: 2,
   },
   {
-    day: 'Thursday',
+    day: "Thursday",
     ProjectA: 3.5,
     ProjectB: 2.5,
     ProjectC: 3,
   },
   {
-    day: 'Friday',
+    day: "Friday",
     ProjectA: 4,
     ProjectB: 1,
     ProjectC: 2.5,
   },
   {
-    day: 'Saturday',
+    day: "Saturday",
     ProjectA: 1.5,
     ProjectB: 0,
     ProjectC: 2,
   },
   {
-    day: 'Sunday',
+    day: "Sunday",
     ProjectA: 0,
     ProjectB: 0,
     ProjectC: 1,
@@ -44,21 +44,21 @@ export const projectWorkData = [
 ];
 
 export const workHours = [
-    { day: 'Monday', hours: 8 },
-    { day: 'Tuesday', hours: 7.5 },
-    { day: 'Wednesday', hours: 9 },
-    { day: 'Thursday', hours: 8.5 },
-    { day: 'Friday', hours: 7 },
-    { day: 'Saturday', hours: 4 },
-    { day: 'Sunday', hours: 1 },
+  { day: "Mon", hours: 8 },
+  { day: "Tues", hours: 7.5 },
+  { day: "Wed", hours: 9 },
+  { day: "Thur", hours: 8.5 },
+  { day: "Fri", hours: 7 },
+  { day: "Sat", hours: 4 },
+  { day: "Sun", hours: 1 },
 ];
 
 export const timeSpentPercent = [
-    { project: 'Project A', percent: 35 },
-    { project: 'Project B', percent: 25 },
-    { project: 'Project C', percent: 20 },
-    { project: 'Project D', percent: 15 },
-    { project: 'Project E', percent: 5 },
+  { project: "Project A", percent: 35 },
+  { project: "Project B", percent: 25 },
+  { project: "Project C", percent: 20 },
+  { project: "Project D", percent: 15 },
+  { project: "Project E", percent: 5 },
 ];
 
 export const TopTimeEnteries = [

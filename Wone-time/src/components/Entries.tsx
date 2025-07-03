@@ -14,22 +14,42 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import NewTimeEntry from "./NewTimeEntry";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { TimeEntryData, ProjectData } from "../types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { TimeEntryData, ProjectData, EditInfo } from "../types";
 import { useLoginInfo } from "../stores/loginState";
-import { getProjects, getTimeEntries, editTimeRecords } from "../services/api";
-import { TopTimeEnteries } from "../assets/dummydata";
-
+import {
+  getProjects,
+  getTimeEntries,
+  editTimeRecords,
+  deleteTimeRecord,
+} from "../services/api";
+import {
+  getSummarisedTimeInfo,
+  projectTimeInfo,
+} from "../services/getStatistics";
+import BufferLoader from "./buffer";
+import DeleteConfirmation from "./DeleteConfirmation";
+// import { DummyDataUploader } from "../assets/enterDummyData";
 const skeleton_load: boolean = false;
 
 function Entries() {
+  const queryClient = useQueryClient();
   //Stuff for the pop up
   const [show, setShow] = useState<boolean>(false);
+  const [deletePopup, setDeletePopup] = useState<boolean>(false);
+  const [deleteId, setDeleteId] = useState<string>("");
   const handleClick = () => {
     setShow(true);
   };
   const handleClose = () => {
     setShow(false);
+  };
+  const handleDeletePopupOpen = (id: string) => {
+    setDeletePopup(true);
+    setDeleteId(id);
+  };
+  const handleDeletePopupClose = () => {
+    setDeletePopup(false);
   };
 
   //getting projects
@@ -50,22 +70,86 @@ function Entries() {
     mutationFn: editTimeRecords,
     onSuccess: () => {
       // Refetch user or update cache
+      queryClient.invalidateQueries(["timeEntries"]);
+      setFilteredResults((t) => t);
+
       alert("You have successfully updated the record");
     },
   });
-  function changeRecord(entry_id: string, entryData: TimeEntryData) {
-    editMutation.mutate({
-      id: entry_id,
-      newData: entryData,
-    });
+
+  // const deleteMutation = useMutation({
+  //   mutationFn: deleteTimeRecord, // function above
+  //   onSuccess: () => {
+  //     // Refresh data after deletion
+  //     queryClient.invalidateQueries(["timeEntries"]);
+  //     setFilteredResults((t) => t);
+
+  //     alert("You have successfully deleted the record");
+  //   },
+  // });
+
+  const [record_info, setRecord_Info] = useState<EditInfo>({
+    entryId: "",
+    projectId: "",
+    notes: "",
+    duration: 0,
+  });
+  function changeRecord(entry_id: string, entryData: EditInfo) {
+    setRecord_Info((prev) => ({
+      ...prev,
+      entryId: entry_id,
+      projectId: entryData.projectId,
+      notes: entryData.notes,
+      duration: entryData.duration,
+    }));
+    handleClick();
+    console.log(record_info);
+    // editMutation.mutate({
+    //   id: entry_id,
+    //   newData: entryData,
+    // });
   }
 
-  const project_list: string[] = [
-    "Project A",
-    "Project B",
-    "Project C",
-    "Project D",
-  ];
+  let projectDetails = [];
+  // const [projectFilter, setProjectFilter] = useState(projectDetails || []);
+  let timeDetails = [];
+  const [filteredResults, setFilteredResults] = useState(timeDetails);
+
+  // need to go a bunch of math to get the statistics
+  if (!timeQuery.isLoading && !projectQuery.isLoading) {
+    projectDetails = projectTimeInfo(timeQuery.data, projectQuery.data);
+    timeDetails = getSummarisedTimeInfo(timeQuery.data, projectQuery.data);
+    // setProjectFilter(projectDetails);
+  }
+
+  function filterProjectTimeRecords(e) {
+    setFilter(e.target.value);
+    let temp;
+    if (e.target.value === "any") {
+      temp = timeDetails.filter((entry) => entry);
+    } else {
+      temp = timeDetails.filter(
+        (entry) => entry.projectName === e.target.value
+      );
+    }
+
+    setFilteredResults(temp);
+    console.log("filteredResults");
+    console.log(filteredResults);
+  }
+
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [filteredValue, setFilter] = useState<string>("");
+
+  function handleSearch(e) {
+    setFilter("any");
+    setSearchValue(e.target.value);
+    console.log(searchValue);
+    const temp = timeDetails.filter((entry) =>
+      entry.notes.includes(e.target.value)
+    );
+    setFilteredResults(temp);
+  }
   return (
     <Box
       sx={{ display: "flex", flexDirection: "column", p: 2, width: "100vw" }}
@@ -91,20 +175,32 @@ function Entries() {
           width: "80%",
         }}
       >
-        <TextField id="search_box" placeholder="Search 🔎" />
+        <TextField
+          id="search_box"
+          placeholder="Search by notes. 🔎"
+          value={searchValue}
+          onChange={(e) => handleSearch(e)}
+        />
         <TextField
           id="project_selection"
           select
           label="Project x"
-          defaultValue={project_list[0]}
           sx={{ minWidth: "200px" }}
+          value={filteredValue}
+          onChange={(e) => filterProjectTimeRecords(e)}
         >
-          {projectQuery.data &&
-            projectQuery.data.map((project: ProjectData) => (
-              <MenuItem key={project.id} value={project.id}>
+          <MenuItem value="any">All projects</MenuItem>
+          {projectQuery.data ? (
+            projectQuery.data.map((project: ProjectData, index: number) => (
+              <MenuItem key={index} value={project.name}>
                 {project.name}
               </MenuItem>
-            ))}
+            ))
+          ) : (
+            <MenuItem disabled value="">
+              Loading projects...
+            </MenuItem>
+          )}
         </TextField>
         <TextField id="date_field" type="date" placeholder="Date" />
       </Box>
@@ -126,13 +222,12 @@ function Entries() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {timeQuery.isLoading || skeleton_load
-                ? [1, 2, 3, 4, 5].map((number) => (
-                    <TableRow key={number}>
-                      {[1, 2, 3, 4, 5].map((my_col) => (
-                        <TableCell>
+              {!timeQuery.isSuccess || skeleton_load
+                ? [1, 2, 3, 4, 5].map((_, index) => (
+                    <TableRow key={index}>
+                      {[1, 2, 3, 4, 5].map((_, i) => (
+                        <TableCell key={i}>
                           <Skeleton
-                            key={my_col}
                             variant="rectangular"
                             sx={{
                               height: "35px",
@@ -143,16 +238,20 @@ function Entries() {
                       ))}
                     </TableRow>
                   ))
-                : TopTimeEnteries.map((entry, index) => (
+                : filteredResults.map((entry, index) => (
                     <TableRow key={index}>
-                      <TableCell>{entry.date}</TableCell>
+                      <TableCell>{entry.date.split("T")[0]}</TableCell>
                       <TableCell>{entry.projectName}</TableCell>
-                      <TableCell>{entry.description}</TableCell>
-                      <TableCell>{entry.time} h</TableCell>
+                      <TableCell>{entry.notes}</TableCell>
+                      <TableCell>{entry.duration} h</TableCell>
                       <TableCell>
                         {/* <Button onClick={changeRecord('1', entry as TimeEntryData)}>Edit</Button> */}
-                        <Button>Edit</Button>
-                        <Button>Delete</Button>
+                        <Button onClick={() => changeRecord(entry.id, entry)}>
+                          Edit
+                        </Button>
+                        <Button onClick={() => handleDeletePopupOpen(entry.id)}>
+                          Delete
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -160,15 +259,50 @@ function Entries() {
           </Table>
         </TableContainer>
       </Box>
+      {show && (
+        <NewTimeEntry
+          myProjects={projectQuery.data}
+          closeFn={handleClose}
+          visibility={show}
+          record_info={record_info}
+        />
+      )}
 
-      {/* <NewTimeEntry myProjects={project_data} closeFn={handleClose} visibility={show}/> */}
-      <NewTimeEntry
-        myProjects={projectQuery.data}
-        closeFn={handleClose}
-        visibility={show}
+      <DeleteConfirmation
+        closeFn={handleDeletePopupClose}
+        id={deleteId}
+        visibilty={deletePopup}
       />
     </Box>
   );
 }
 
 export default Entries;
+
+// Weird way of doing things
+// filteredResults.map((project, index) => {
+//                     if (project !== null)
+//                       return project.projectTimeEntries.map((entry) => (
+//                         <TableRow key={index}>
+//                           <TableCell>{entry.date.split("T")[0]}</TableCell>
+//                           <TableCell>{project.name}</TableCell>
+//                           <TableCell>{entry.notes}</TableCell>
+//                           <TableCell>
+//                             {entry.hours + entry.minutes / 60} h
+//                           </TableCell>
+//                           <TableCell>
+//                             {/* <Button onClick={changeRecord('1', entry as TimeEntryData)}>Edit</Button> */}
+//                             <Button
+//                               onClick={() => changeRecord(entry.id, entry)}
+//                             >
+//                               Edit
+//                             </Button>
+//                             <Button
+//                               onClick={() => deleteMutation.mutate(entry.id)}
+//                             >
+//                               Delete
+//                             </Button>
+//                           </TableCell>
+//                         </TableRow>
+//                       ));
+//                   })

@@ -15,16 +15,16 @@ import { useLoginInfo } from "../stores/loginState";
 import { type ErrorMessage, type UserData } from "../types";
 import { parseError } from "../services/firebaseError";
 
-import { useMutation } from "@tanstack/react-query";
-import { addNewUser } from "../services/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { addNewUser, getUserInfo } from "../services/api";
 
-const debug: boolean = false;
+const debug: boolean = true;
 
 const handleLogout = async () => {
   try {
+    useLoginInfo.getState().resetStore();
     await signOut(auth);
     console.log("User signed out.");
-    useLoginInfo.setState({ loginStatus: false });
   } catch (error) {
     console.error("Sign-out error:", error);
   }
@@ -39,6 +39,8 @@ function Login() {
   });
 
   const changeStatus = useLoginInfo((state) => state.changeState);
+  const resetStore = useLoginInfo((state) => state.resetStore);
+
   const navigate = useNavigate();
 
   const handleLogin = async (username: string, password: string) => {
@@ -56,8 +58,15 @@ function Login() {
         (error as any).code = "unverified-email";
         throw error;
       }
+      // useLoginInfo.getState().resetStore();
+      resetStore();
       useLoginInfo.setState({ loginStatus: true });
       useLoginInfo.setState({ userId: auth.currentUser?.uid });
+      console.log(
+        "setting form login ",
+        auth.currentUser?.email,
+        auth.currentUser?.uid
+      );
       navigate("/");
     } catch (error) {
       setError({ hasError: true, message: parseError(error.code) });
@@ -151,12 +160,6 @@ function Signup() {
   });
 
   function handleAddNewUser() {
-    let displayName = prompt("Please enter your display name:", "Harry Potter");
-
-    while (!displayName) {
-      displayName = prompt("Enter a valuid username please:", "Harry Potter");
-    }
-
     const newAccount: UserData = {
       name: displayName,
       email: username,
@@ -165,6 +168,7 @@ function Signup() {
     mutation.mutate(newAccount);
   }
   const [username, setUsername] = useState<string>("");
+  const [displayName, setdisplayName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmpassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<ErrorMessage>({
@@ -195,7 +199,9 @@ function Signup() {
 
         handleAddNewUser(); // add user to database
 
-        alert("Go verify your email! or else you will not be able to login!");
+        alert(
+          "Go verify your email before logging in, be sure to check your spam or junk mail."
+        );
         handleLogout(); // need to first verify their account
       } catch (error) {
         setError({ hasError: true, message: parseError(error.code) });
@@ -217,7 +223,7 @@ function Signup() {
         p: 2,
       }}
     >
-      <Typography variant="h2" variant="h2" sx={{ mb: 2 }}>
+      <Typography variant="h2" sx={{ mb: 2 }}>
         SignUp
       </Typography>
 
@@ -227,6 +233,14 @@ function Signup() {
         sx={{ mb: "4px" }}
         id="email_signup"
         onChange={(e) => setUsername(e.target.value)}
+        placeholder="Enter you email"
+      />
+      <InputLabel htmlFor="displayName_signup">Display Name</InputLabel>
+      <Input
+        required={error.hasError}
+        sx={{ mb: "4px" }}
+        id="displayName_signup"
+        onChange={(e) => setdisplayName(e.target.value)}
         placeholder="Enter you email"
       />
 
@@ -285,7 +299,7 @@ function Signup() {
 
 function UserAccount() {
   function CheckUserstatus() {
-    console.log(useLoginInfo.getState().loginStatus);
+    console.log(useLoginInfo.getState());
 
     if (auth.currentUser) {
       console.log("You are logged in as " + auth.currentUser.email);

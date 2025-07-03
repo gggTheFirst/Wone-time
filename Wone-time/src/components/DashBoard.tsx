@@ -9,10 +9,14 @@ import {
 } from "@mui/material";
 import TimerIcon from "@mui/icons-material/Timer";
 import DateRangeIcon from "@mui/icons-material/DateRange";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 
 import ProjectSummary from "./ProjectSummary";
 import ProjectProgress from "./ProjectProgress";
 import NewProject from "./NewProject";
+import BufferLoader from "./buffer";
+import DailyProjectHours from "./graphs/DailyProjectHours";
+import HoursInWeek from "./graphs/totalWeekHours";
 
 import { useState } from "react";
 import { useLoginInfo } from "../stores/loginState";
@@ -29,8 +33,15 @@ import {
   YAxis,
   ResponsiveContainer,
   Legend,
+  Tooltip,
 } from "recharts";
-import { workHours, projectWorkData } from "../assets/dummydata";
+
+import {
+  calcTotalHours,
+  getProjectWorkData,
+  projectTimeInfo,
+  weekInfo,
+} from "../services/getStatistics";
 
 const skeleton_load: boolean = false;
 function DashBoard() {
@@ -43,12 +54,27 @@ function DashBoard() {
     queryFn: () => getProjects(userId),
   });
 
+  // getting time entries
   const timeQuery = useQuery<TimeEntryData>({
     queryKey: ["timeEntries", userId],
     queryFn: () => getTimeEntries(userId /* should be project id*/),
   });
 
+  let weeklyStats;
+  let totalHours: number = 0;
+  let projectDetails = [];
+  let projectWeekInfo: {
+    day: string;
+    [projectName: string]: number;
+  } = [];
+
   // need to go a bunch of math to get the statistics
+  if (!timeQuery.isLoading && !projectQuery.isLoading) {
+    weeklyStats = weekInfo(timeQuery.data);
+    totalHours = calcTotalHours(timeQuery.data).toFixed(2);
+    projectDetails = projectTimeInfo(timeQuery.data, projectQuery.data);
+    projectWeekInfo = getProjectWorkData(timeQuery.data, projectQuery.data);
+  }
 
   //Stuff for the pop up
   const [show, setShow] = useState<boolean>(false);
@@ -60,7 +86,7 @@ function DashBoard() {
   };
 
   return (
-    <Box sx={{ border: "1px solid black", width: "100vw", p: 3 }}>
+    <Grid size={12} sx={{ border: "1px solid black", p: 3, width: "100vw" }}>
       <Typography variant="h4">Dashboard</Typography>
       <Grid container spacing={1}>
         <Grid size={{ sm: 12, md: 6 }} sx={{ border: "1px solid black", p: 2 }}>
@@ -71,6 +97,7 @@ function DashBoard() {
               mb: 2,
               display: "flex",
               justifyContent: "space-evenly",
+              backgroundColor: "red",
             }}
           >
             <Card
@@ -99,7 +126,7 @@ function DashBoard() {
                   }}
                 >
                   <Typography variant="h4" sx={{ mb: 2 }}>
-                    0.0h
+                    {totalHours}h
                   </Typography>
                   <Box
                     sx={{
@@ -109,13 +136,13 @@ function DashBoard() {
                       p: "2px",
                     }}
                   >
-                    <Box sx={{ borderRight: 1, minWidth: "48%" }}>
-                      <Typography>All projects</Typography>
-                      <Typography>2 projects</Typography>
-                    </Box>
-                    <Box sx={{ minWidth: "48%", pl: 3 }}>
-                      <Typography>Daily average</Typography>
-                      <Typography>0.0h</Typography>
+                    <Box sx={{}}>
+                      <Typography variant="h6">All projects:</Typography>
+
+                      <Typography>
+                        {projectQuery?.data && projectQuery?.data.length}{" "}
+                        Projects
+                      </Typography>
                     </Box>
                   </Box>
                 </CardContent>
@@ -145,18 +172,15 @@ function DashBoard() {
                     display: "flex",
                     flexDirection: "column",
                     height: "120px",
+                    pb: 0,
                   }}
                 >
                   <Typography variant="h4" sx={{ mb: 2 }}>
-                    0.0h
+                    {weeklyStats?.totalHours}h
                   </Typography>
-
-                  <Box sx={{ width: "100%", height: "50px", display: "flex" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={workHours}>
-                        <Bar dataKey={"hours"} fill="#1976d2" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <Box sx={{ minWidth: "48%", pl: 3 }}>
+                    <Typography variant="h6">Daily average</Typography>
+                    <Typography>{weeklyStats?.averageHours}h</Typography>
                   </Box>
                 </CardContent>
               )}
@@ -172,32 +196,23 @@ function DashBoard() {
               flexDirection: "column",
             }}
           >
-            {/* <Typography variant='h6' >Statisitics</Typography> */}
-            {timeQuery.isLoading || skeleton_load ? (
+            {projectWeekInfo?.length === 0 || skeleton_load ? (
               <Skeleton
                 variant="rectangular"
                 sx={{ width: "100%", height: "100%" }}
               />
             ) : (
               <Box
-                sx={{ width: "100%", height: "100%", display: "flex", p: 0 }}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  p: 0,
+                }}
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={projectWorkData}
-                    margin={{ top: 5, right: 15, bottom: 5, left: 5 }}
-                    title="Statisics"
-                  >
-                    <Legend verticalAlign="top" height={36} />
-                    <XAxis dataKey={"day"} />
-                    <YAxis width={20} />
-
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <Bar dataKey={"ProjectA"} fill="#1976d2" />
-                    <Bar dataKey={"ProjectB"} fill="#1986d2" />
-                    <Bar dataKey={"ProjectC"} fill="#1996d2" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <Typography variant="h5">Hours worked this week</Typography>
+                <HoursInWeek dailyTimes={weeklyStats?.dailyTimes} />
               </Box>
             )}
           </Card>
@@ -211,7 +226,7 @@ function DashBoard() {
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
-              Projects Overview
+              Projects Overview of time spent
             </Typography>
             {timeQuery.isLoading || skeleton_load
               ? [1, 2, 3, 4].map((number) => (
@@ -221,8 +236,13 @@ function DashBoard() {
                     sx={{ width: "100%", height: "20px", mb: 2 }}
                   />
                 ))
-              : project_list.map((project) => (
-                  <ProjectProgress key={project} />
+              : projectDetails.map((project, index) => (
+                  <ProjectProgress
+                    key={index}
+                    projectTotal={project.totalHours}
+                    totalHours={totalHours}
+                    projName={project.name}
+                  />
                 ))}
           </Card>
         </Grid>
@@ -267,14 +287,14 @@ function DashBoard() {
                     sx={{ width: "100%", height: "80px", mb: 2 }}
                   />
                 ))
-              : projectQuery?.data.map((project) => (
-                  <ProjectSummary key={project.id} project={project} />
+              : projectDetails.map((project, index) => (
+                  <ProjectSummary key={index} project={project} />
                 ))}
           </Box>
         </Grid>
       </Grid>
       <NewProject closeFn={handleClose} visibility={show} />
-    </Box>
+    </Grid>
   );
 }
 

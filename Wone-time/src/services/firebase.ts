@@ -1,6 +1,6 @@
 // src/firebase.js or src/firebase.ts
 import { initializeApp } from "firebase/app";
-import { getAuth,  getIdTokenResult } from "firebase/auth";
+import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,10 +11,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-
-
 const app = initializeApp(firebaseConfig);
 
 export default app;
 export const auth = getAuth(app);
-export const getUpdatedAuth = () => getAuth(app) 
+export const getUpdatedAuth = () => getAuth(app);

@@ -1,11 +1,11 @@
 import { Card, Typography, Box, CardContent, Avatar } from "@mui/material";
-import type { ProjectData } from "../types";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 
-function ProjectSummary({ project }: { project: ProjectData }) {
+function ProjectSummary({ project }) {
   return (
     <Card sx={{ width: "98%", display: "flex", m: "2px", borderRadius: "8px" }}>
       <Box sx={{ width: "15%", position: "relative", paddingTop: "15%" }}>
-        <Avatar
+        <AccountTreeIcon
           sx={{
             position: "absolute",
             top: 0,
@@ -13,9 +13,7 @@ function ProjectSummary({ project }: { project: ProjectData }) {
             width: "100%",
             height: "100%",
           }}
-        >
-          Project X
-        </Avatar>
+        />
       </Box>
 
       <CardContent
@@ -26,7 +24,7 @@ function ProjectSummary({ project }: { project: ProjectData }) {
       </CardContent>
 
       <Box sx={{ alignItems: "center", display: "flex" }}>
-        <Typography variant={"h5"}>0.0 h</Typography>
+        <Typography variant={"h5"}>{project.totalHours.toFixed(2)}h</Typography>
       </Box>
     </Card>
   );

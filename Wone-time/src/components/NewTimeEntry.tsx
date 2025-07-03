@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Button,
@@ -15,26 +15,42 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import api from "../services/api";
 import { auth } from "../services/firebase";
-import { type ProjectData, type TimeEntryData } from "../types";
-import { useMutation } from "@tanstack/react-query";
+import { type ProjectData, type TimeEntryData, type EditInfo } from "../types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLoginInfo } from "../stores/loginState";
+import BufferLoader from "./buffer";
 
 function NewTimeEntry({
   myProjects,
   closeFn,
   visibility,
+  record_info,
 }: {
   myProjects: ProjectData[];
   closeFn: () => void;
   visibility: boolean;
+  record_info?: EditInfo;
 }) {
+  const queryClient = useQueryClient();
   //getting projects
+  const [projName, setProjName] = useState(
+    record_info?.entryId ? record_info?.projectId : ""
+  );
+  const [projDesc, setprojDesc] = useState<string>(
+    record_info?.entryId ? record_info?.notes ?? "" : ""
+  );
+  const [hours, setHours] = useState<number>(
+    record_info?.entryId ? Math.trunc(record_info?.duration ?? 0) : 0
+  );
+  const min =
+    ((record_info?.duration ?? 0) - Math.trunc(record_info?.duration ?? 0)) *
+    60;
+  const [minutes, setMinutes] = useState<number>(Math.trunc(min));
+  const [close, setClose] = useState<boolean>(false);
 
-  const [projName, setProjName] = useState<string>("");
-  const [projDesc, setprojDesc] = useState<string>("");
-
+  // console.log("New Entries", record_info);
   // adding time entries
-  const createProject = async (LogEntry: TimeEntryData) => {
+  const createTimeEntry = async (LogEntry: TimeEntryData) => {
     const key = await auth.currentUser?.getIdToken();
     console.log(key);
     const response = await api({
@@ -49,15 +65,15 @@ function NewTimeEntry({
     return response;
   };
 
-  const mutation = useMutation({
-    mutationFn: createProject,
+  const { mutate, isPending } = useMutation({
+    mutationFn: createTimeEntry,
     onSuccess: () => {
       // Optionally refetch project list
-      //queryClient.invalidateQueries(['projects']);
+      queryClient.invalidateQueries(["timeEntries"]);
       alert("You have made a new time entry!");
+      if (close) closeFn();
     },
   });
-
   function handleClick() {
     const LogEntry: TimeEntryData = {
       // add id
@@ -65,16 +81,18 @@ function NewTimeEntry({
       userId: useLoginInfo.getState().userId,
       notes: projDesc,
       date: new Date(),
-      time: new Date(),
-      created: new Date(),
-      updated: new Date(),
+      hours: hours,
+      minutes: minutes,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    mutation.mutate(LogEntry);
+    mutate(LogEntry);
   }
 
   return (
     <Popover
+      keepMounted={false}
       open={visibility}
       onClose={closeFn}
       anchorReference="anchorPosition"
@@ -116,6 +134,7 @@ function NewTimeEntry({
           id="prioject_name"
           select
           sx={{ minWidth: "200px" }}
+          value={projName}
         >
           {myProjects
             ? myProjects.map((project) => (
@@ -135,17 +154,26 @@ function NewTimeEntry({
           type="text"
           id="time_entry_desc"
           placeholder="Description"
+          value={projDesc}
           onChange={(e) => setprojDesc(e.target.value)}
         />
 
         <Box sx={{ display: "flex", my: 3 }}>
           <Box sx={{ pr: 4 }}>
             <Typography>Hours</Typography>
-            <Input type="number" />
+            <Input
+              type="number"
+              onChange={(e) => setHours(Number(e.target.value))}
+              defaultValue={hours}
+            />
           </Box>
           <Box>
             <Typography>Minutes</Typography>
-            <Input type="number" />
+            <Input
+              type="number"
+              onChange={(e) => setMinutes(Number(e.target.value))}
+              defaultValue={minutes}
+            />
           </Box>
         </Box>
         <Box sx={{ justifyContent: "right", display: "flex" }}>
@@ -154,7 +182,10 @@ function NewTimeEntry({
           </Button>
           <Button
             variant="contained"
-            onClick={handleClick}
+            onClick={() => {
+              handleClick();
+              setClose(false);
+            }}
             sx={{ px: 2, mr: 1 }}
           >
             Add and Continue
@@ -163,7 +194,7 @@ function NewTimeEntry({
             variant="contained"
             onClick={() => {
               handleClick();
-              closeFn();
+              setClose(true);
             }}
             sx={{ px: 4 }}
           >
@@ -171,6 +202,7 @@ function NewTimeEntry({
           </Button>
         </Box>
       </Box>
+      {isPending && <BufferLoader />}
     </Popover>
   );
 }
