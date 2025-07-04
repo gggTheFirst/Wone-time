@@ -9,13 +9,11 @@ import {
 } from "@mui/material";
 import TimerIcon from "@mui/icons-material/Timer";
 import DateRangeIcon from "@mui/icons-material/DateRange";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
 
 import ProjectSummary from "./ProjectSummary";
 import ProjectProgress from "./ProjectProgress";
 import NewProject from "./NewProject";
-import BufferLoader from "./buffer";
-import DailyProjectHours from "./graphs/DailyProjectHours";
+
 import HoursInWeek from "./graphs/totalWeekHours";
 
 import { useState } from "react";
@@ -24,17 +22,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import { type ProjectData, type TimeEntryData } from "../types";
 import { getProjects, getTimeEntries } from "../services/api";
-
-import {
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
 
 import {
   calcTotalHours,

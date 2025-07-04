@@ -27,26 +27,36 @@ function NewProject({
   const queryClient = useQueryClient();
   const [projectname, setProjectName] = useState<string>("");
   const [projectdesc, setProjectDescription] = useState<string>("");
-
+  const [validationError, setValidationError] = useState<string>("");
   //creating project
   const { mutate, isPending } = useMutation({
     mutationFn: createProject,
     onSuccess: () => {
       // Optionally refetch project list
       queryClient.invalidateQueries(["projects"]);
-      closeFn();
-      alert("You have made a project whoopie!");
+      handleClose();
     },
   });
+  function handleClose() {
+    setProjectName("");
+    setProjectDescription("");
+    setValidationError("");
 
+    closeFn();
+  }
   function handleClick() {
     const newProj: ProjectData = {
       name: projectname,
       userId: useLoginInfo.getState().userId,
       description: projectdesc,
     };
-
-    mutate(newProj);
+    // check if project name is empty
+    if (projectname.trim() === "" || projectdesc.trim() === "") {
+      setValidationError("Project name and description cannot be empty.");
+    } else {
+      setValidationError("");
+      mutate(newProj);
+    }
   }
 
   return (
@@ -79,7 +89,7 @@ function NewProject({
       >
         <CloseIcon
           sx={{ position: "absolute", right: "10px" }}
-          onClick={closeFn}
+          onClick={handleClose}
         />
         <Typography variant="h3">Create New Project</Typography>
         <Typography>Add a new project to start tracking time</Typography>
@@ -90,6 +100,7 @@ function NewProject({
           type="text"
           id="project_name"
           value={projectname}
+          required
           placeholder="Project Name"
         />
 
@@ -101,11 +112,21 @@ function NewProject({
           value={projectdesc}
           type="text"
           id="project_description"
+          required
           placeholder="Project Description"
         />
+        {validationError && (
+          <Typography color="red" sx={{ mt: 1 }}>
+            {validationError}
+          </Typography>
+        )}
 
         <Box sx={{ justifyContent: "right", display: "flex", mt: 2 }}>
-          <Button variant="outlined" onClick={closeFn} sx={{ px: 4, mx: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={handleClose}
+            sx={{ px: 4, mx: 1 }}
+          >
             Cancel
           </Button>
           <Button variant="contained" onClick={handleClick} sx={{ px: 2 }}>

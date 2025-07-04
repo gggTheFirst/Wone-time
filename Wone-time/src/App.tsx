@@ -44,7 +44,7 @@ function App() {
           <Route element={<Layout2 />}>
             <Route path="/" element={<Home />} />
             <Route path="/Report" element={<Report />} />
-            <Route path="/timeEntries" element={<TimeEntries />} />
+            <Route path="/timeEntries/" element={<TimeEntries />} />
           </Route>
         </Routes>
       </AuthProvider>

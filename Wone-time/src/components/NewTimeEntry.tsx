@@ -32,6 +32,8 @@ function NewTimeEntry({
   record_info?: EditInfo;
 }) {
   const queryClient = useQueryClient();
+  const [validationError, setValidationError] = useState<string>("");
+
   //getting projects
   const [projName, setProjName] = useState(
     record_info?.entryId ? record_info?.projectId : ""
@@ -87,7 +89,17 @@ function NewTimeEntry({
       updatedAt: new Date(),
     };
 
-    mutate(LogEntry);
+    // if any field is empty validation error
+    if (
+      projName.trim() === "" ||
+      projDesc.trim() === "" ||
+      (hours <= 0 && minutes <= 0)
+    ) {
+      setValidationError("Please fill in all fields correctly.");
+    } else {
+      setValidationError("");
+      mutate(LogEntry);
+    }
   }
 
   return (
@@ -158,7 +170,7 @@ function NewTimeEntry({
           onChange={(e) => setprojDesc(e.target.value)}
         />
 
-        <Box sx={{ display: "flex", my: 3 }}>
+        <Box sx={{ display: "flex", mt: 3 }}>
           <Box sx={{ pr: 4 }}>
             <Typography>Hours</Typography>
             <Input
@@ -176,7 +188,12 @@ function NewTimeEntry({
             />
           </Box>
         </Box>
-        <Box sx={{ justifyContent: "right", display: "flex" }}>
+        {validationError && (
+          <Typography color="red" sx={{ mt: 1 }}>
+            {validationError}
+          </Typography>
+        )}
+        <Box sx={{ mt: 2, justifyContent: "right", display: "flex" }}>
           <Button variant="outlined" onClick={closeFn} sx={{ px: 2, mr: 1 }}>
             Cancel
           </Button>

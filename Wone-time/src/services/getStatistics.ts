@@ -27,6 +27,7 @@ export function projectTimeInfo(
     );
     const totalH = calcTotalHours(relatedTimeEntries);
     return {
+      id: project.id,
       name: project.name,
       description: project.description,
       projectTimeEntries: relatedTimeEntries,

@@ -1,9 +1,24 @@
-import { Card, Typography, Box, CardContent, Avatar } from "@mui/material";
+import { Card, Typography, Box, CardContent } from "@mui/material";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import { useNavigate } from "react-router-dom";
 
 function ProjectSummary({ project }) {
+  const navigate = useNavigate();
+  function navigateToProject(projectId: string) {
+    navigate(`/timeEntries?projectId=${projectId}`);
+  }
+
   return (
-    <Card sx={{ width: "98%", display: "flex", m: "2px", borderRadius: "8px" }}>
+    <Card
+      onClick={() => navigateToProject(project.id)}
+      sx={{
+        cursor: "pointer",
+        width: "98%",
+        display: "flex",
+        m: "2px",
+        borderRadius: "8px",
+      }}
+    >
       <Box sx={{ width: "15%", position: "relative", paddingTop: "15%" }}>
         <AccountTreeIcon
           sx={{

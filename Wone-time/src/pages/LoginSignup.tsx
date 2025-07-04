@@ -232,6 +232,7 @@ function Signup() {
         required={error.hasError}
         sx={{ mb: "4px" }}
         id="email_signup"
+        type="email"
         onChange={(e) => setUsername(e.target.value)}
         placeholder="Enter you email"
       />
@@ -240,8 +241,9 @@ function Signup() {
         required={error.hasError}
         sx={{ mb: "4px" }}
         id="displayName_signup"
+        type="text"
         onChange={(e) => setdisplayName(e.target.value)}
-        placeholder="Enter you email"
+        placeholder="Enter you display name"
       />
 
       <InputLabel htmlFor="password_signup">Password</InputLabel>
